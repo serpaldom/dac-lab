@@ -1,0 +1,22 @@
+title: SSH SYN Scan - multiple SYNs to port 22
+id: dac-ssh-synscan-0001
+status: stable
+description: Detecta intentos de escaneo/force-scan hacia SSH mediante múltiples paquetes SYN al puerto 22 en ventana corta.
+author: SOC Lab
+date: 2025/11/12
+logsource:
+  product: network
+  category: connection
+detection:
+  selection:
+    network.transport: tcp
+    network.destination_port: 22
+    tcp.flags: S
+  timeframe: 10m
+  aggregation:
+    key: source.ip
+    value: count
+  condition: aggregation.value > 10
+level: high
+falsepositives:
+  - herramientas de administración legítimas abusando de conexiones

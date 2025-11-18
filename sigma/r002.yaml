@@ -1,0 +1,18 @@
+title: DNS Exfiltration via Base64-like Labels
+id: dac-dns-exfil-0001
+status: experimental
+description: Detecta consultas DNS que contienen etiquetas de longitud larga compatibles con Base64 (potencial exfiltración).
+author: SOC Lab
+date: 2025/11/12
+logsource:
+  product: network
+  service: dns
+detection:
+  selection:
+    network.transport: udp
+    network.destination_port: 53
+    dns.query: /[A-Za-z0-9+\/]{40,}=?/
+  condition: selection
+level: high
+falsepositives:
+  - CDNs y trackers que usan etiquetas largas (raro)

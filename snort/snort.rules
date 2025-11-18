@@ -1,0 +1,13 @@
+# Stage 1: detect many SYNs to port 22 -> set flowbit
+#alert tcp any any -> $HOME_NET 22 (msg:"STAGE1 SSH: multiple SYNs to 22"; flags:S; threshold:type both, track by_src, count 10, seconds 60; flowbits:set,ssh_bruteforce_stage1; sid:1000001; rev:1;)
+
+# Stage 2: detect HTTP probe from same host if stage1 flowbit is set
+#alert tcp any any -> $HOME_NET [80,8080] (msg:"STAGE2 HTTP probe after SSH brute force stage1"; flowbits:isset,ssh_bruteforce_stage1; flags:S; sid:1000002; rev:1;)
+
+# SSH SYN scan: muchos SYN a puerto 22 en ventana corta
+alert tcp any any -> $HOME_NET 22 (msg:"DAC SSH SYN scan - multiple SYNs to 22";\
+  flags:S; detection_filter:track by_src, count 11, seconds 10; sid:1000001; rev:1;)
+
+# DNS exfil via base64-like labels (long base64 fragment in qname)
+alert udp any any -> any 53 (msg:"DAC DNS exfil - base64-like label in query";\
+  flow:to_server; pcre:"/([A-Za-z0-9+\/]{40,}=*)/R"; sid:1000002; rev:1;)
